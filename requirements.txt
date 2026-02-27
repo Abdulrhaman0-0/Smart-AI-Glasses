@@ -1,0 +1,8 @@
+google-genai
+opencv-python
+gTTS
+pygame
+pyaudio
+keyboard
+edge-tts
+python-dotenv

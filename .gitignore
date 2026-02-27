@@ -1,0 +1,20 @@
+# Environment secrets — NEVER commit this file
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp audio/vision files created at runtime
+temp_vision.jpg
+temp_voice.wav
+temp_speech.mp3
+gemini_tts.wav
+edge_tts.mp3
+gemini_out.wav
+edge_out.mp3
+output_audio.mp3
+ai_response.mp3
+temp_capture.jpg
+temp_record.wav
