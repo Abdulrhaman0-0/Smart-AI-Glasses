@@ -186,13 +186,15 @@ def process_voice(audio_file_path):
         try:
             sample_file = client.files.upload(file=audio_file_path)
             prompt = (
-                "Detect the language of the user's audio. "
-                "You MUST respond in the EXACT SAME language — choose ONLY from: "
+                "You are a highly intelligent and helpful AI assistant embedded in smart glasses. "
+                "Listen to the user's audio, understand their query or command, and provide a helpful, conversational answer. "
+                "You MUST respond in the EXACT SAME language the user spoke in — choose ONLY from: "
                 "Arabic, English, French, German, Spanish, or Japanese. "
                 "Prefix your response strictly with the 2-letter language code and a pipe symbol. "
-                "Examples: 'ar|أهلاً بك', 'en|Hello', 'fr|Bonjour', 'de|Hallo', 'es|Hola', 'ja|こんにちは'. "
-                "Keep the response concise. No markdown, no emojis."
-            )
+                "Example if user asks about weather in Arabic: 'ar|الجو اليوم مشمس وجميل'. "
+                "Example if user says hello in English: 'en|Hello! How can I help you today?'. "
+                "Keep the response concise, natural, and directly address the user's input. No markdown, no emojis."
+            )                         
             response = client.models.generate_content(
                 model=MODEL_ID,
                 contents=[sample_file, prompt]
