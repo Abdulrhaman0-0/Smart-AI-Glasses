@@ -13,6 +13,9 @@ from google import genai
 # Load .env file
 load_dotenv()
 
+# Store the latest translated text from the camera
+last_seen_text = ""
+
 # ==========================================
 # API Key Rotation Setup
 # ==========================================
@@ -134,6 +137,10 @@ def process_vision():
             )
             client.files.delete(name=sample_file.name)
             result = response.text.strip()
+            
+            global last_seen_text
+            last_seen_text = result
+            
             print(f"-> {result}")
             speak_text(f"ar|{result}")
             success = True
@@ -185,8 +192,14 @@ def process_voice(audio_file_path):
     for attempt in range(3):
         try:
             sample_file = client.files.upload(file=audio_file_path)
+            global last_seen_text
             prompt = (
                 "You are a highly intelligent and helpful AI assistant embedded in smart glasses. "
+                "Your name is Gimmy. "
+                "If asked 'Talk about us', answer exactly with \"You're in specific education college at kafrelshiekh university, you're studying computer teacher program in English\". "
+                "If asked 'اديني معلومات عن تيم كود فيرس', answer exactly with \"تيم كود فيرس هما تيم في الفرقه الرابعه ، وانا مشروع تخرجكم الخاص بقسم معلم حاسب باللغة الإنجليزية، كلية التربية النوعية ، جامعة كفر الشيخ\". "
+                "If asked 'انت مين؟', answer exactly with \"انا جيمي، نظارتك السمارت مربوط بسماعه و مايك وكاميرا، اقدر اشوف من خلال الكاميرا اللي مربوطة بيا واسمع سؤالك من خلال المايك واجاوبك، وانتم صممتوني علشان اقدر اساعد الاشخاص اللي عندها صعوبات في التعلم\". "
+                f"Note: The last text captured by the user's camera is '{last_seen_text}'. If the user asks you to explain, summarize, or talk about what they are looking at, use this text to answer. "
                 "Listen to the user's audio, understand their query or command, and provide a helpful, conversational answer. "
                 "You MUST respond in the EXACT SAME language the user spoke in — choose ONLY from: "
                 "Arabic, English, French, German, Spanish, or Japanese. "

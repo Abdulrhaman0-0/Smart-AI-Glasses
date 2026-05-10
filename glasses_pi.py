@@ -14,6 +14,9 @@ from gpiozero import Button
 # Load API key from .env file
 load_dotenv()
 
+# Store the latest translated text from the camera
+last_seen_text = ""
+
 # ==========================================
 # API Key Rotation Setup
 # ==========================================
@@ -142,7 +145,12 @@ def run_vision():
                 contents=[sample_file, prompt]
             )
             client.files.delete(name=sample_file.name)
-            speak_text(f"ar|{response.text.strip()}")
+            result = response.text.strip()
+            
+            global last_seen_text
+            last_seen_text = result
+            
+            speak_text(f"ar|{result}")
             break
         except Exception as e:
             if "429" in str(e):
@@ -190,7 +198,13 @@ def record_and_process_voice():
         try:
             print("[AI] Uploading audio...")
             sample_file = client.files.upload(file=audio_path)
+            global last_seen_text
             prompt = (
+                "Your name is Gimmy. "
+                "If asked 'Talk about us', answer exactly with \"You're in specific education college at kafrelshiekh university, you're studying computer teacher program in English\". "
+                "If asked 'اديني معلومات عن تيم كود فيرس', answer exactly with \"تيم كود فيرس هما تيم في الفرقه الرابعه ، وانا مشروع تخرجكم الخاص بقسم معلم حاسب باللغة الإنجليزية، كلية التربية النوعية ، جامعة كفر الشيخ\". "
+                "If asked 'انت مين؟', answer exactly with \"انا جيمي، نظارتك السمارت مربوط بسماعه و مايك وكاميرا، اقدر اشوف من خلال الكاميرا اللي مربوطة بيا واسمع سؤالك من خلال المايك واجاوبك، وانتم صممتوني علشان اقدر اساعد الاشخاص اللي عندها صعوبات في التعلم\". "
+                f"Note: The last text captured by the user's camera is '{last_seen_text}'. If the user asks you to explain, summarize, or talk about what they are looking at, use this text to answer. "
                 "Detect the language of the user's audio. "
                 "You MUST respond in the EXACT SAME language — choose ONLY from: "
                 "Arabic, English, French, German, Spanish, or Japanese. "
