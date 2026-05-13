@@ -165,30 +165,29 @@ def run_vision():
 # Voice Pipeline (GPIO 27 - Push to Talk)
 # ==========================================
 def record_and_process_voice():
-    p = pyaudio.PyAudio()
-    stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
-    frames = []
-
     print("[Voice] Listening...")
+    audio_path = "/tmp/temp_voice.wav"
+    
+    import subprocess
+    # Start recording via native ALSA subprocess (using default ~/.asoundrc routing)
+    record_cmd = ["arecord", "-f", "S16_LE", "-c", "1", "-r", "44100", audio_path]
+    process = subprocess.Popen(record_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Keep recording while the button is held
     while voice_button.is_pressed:
-        data = stream.read(CHUNK, exception_on_overflow=False)
-        frames.append(data)
+        time.sleep(0.1)
 
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    # Button released -> Terminate the subprocess
+    process.terminate()
+    process.wait()
 
-    if len(frames) < 5:
-        return  # Too short
+    # Check if recording was successful
+    import os
+    if not os.path.exists(audio_path) or os.path.getsize(audio_path) < 1000:
+        print("[Error] Audio recording failed or was too short.")
+        return
 
     print("[Voice] Processing...")
-    audio_path = "/tmp/temp_voice.wav"
-    wf = wave.open(audio_path, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
-    wf.close()
 
     for attempt in range(3):
         try:
